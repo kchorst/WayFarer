@@ -73,5 +73,5 @@ if(windows.packageManifestSha256!==packageManifestSha256)throw new Error('RELEAS
 const requiredChecks=['integrityVerified','launcherUsed','appReachable','backgroundWorkStarted','normalExitUsed','nodeGone','workersGone','portFree','runtimeStateGone','folderRenamed','folderDeleted']
 const missingChecks=requiredChecks.filter(k=>windows.checks?.[k]!==true)
 if(missingChecks.length)throw new Error(`RELEASE BLOCKED: Windows lifecycle evidence is incomplete: ${missingChecks.join(', ')}`)
-if(release.status!=='ready_for_user_acceptance')throw new Error(`RELEASE BLOCKED: RELEASE.json status is ${release.status||'missing'}, not ready_for_user_acceptance.`)
-console.log(`Release Manager gate PASS — ${release.releaseId} — rendered and native-Windows evidence are hash-bound to the exact package.`)
+if(release.status==='ready_for_user_acceptance')throw new Error('RELEASE BLOCKED: source metadata was pre-promoted before independent exact-package qualification. READY is an output of this gate, not an input.')
+console.log(`Release Manager gate PASS — ${release.releaseId} — rendered and native-Windows evidence are hash-bound to the exact package; machine qualification may now publish the traveler artifact as READY FOR USER ACCEPTANCE.`)

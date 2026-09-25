@@ -68,9 +68,25 @@ jobs:
           $env:WAYFINDER_EXACT_ZIP_SHA256=$hash
           cd dist\exact\WAYFINDER
           node release-gate.mjs
+      - name: Machine qualification certificate
+        shell: pwsh
+        run: |
+          $hash=(Get-Content dist\zip.sha256).Trim()
+          $release=Get-Content -Raw dist\exact\WAYFINDER\RELEASE.json | ConvertFrom-Json
+          $certificate=[ordered]@{
+            verdict='READY_FOR_USER_ACCEPTANCE'
+            releaseId=$release.releaseId
+            exactZipSha256=$hash
+            commit='${{ github.sha }}'
+            workflowRun='${{ github.run_id }}'
+            qualifiedAt=(Get-Date).ToUniversalTime().ToString('o')
+          }
+          $certificate | ConvertTo-Json | Set-Content dist\QUALIFICATION.json -Encoding UTF8
       - name: Publish traveler artifact only after every gate above passes
         uses: actions/upload-artifact@v4
         with:
           name: WAYFINDER-WINDOWS-QUALIFIED
-          path: dist/WAYFINDER-CANDIDATE.zip
+          path: |
+            dist/WAYFINDER-CANDIDATE.zip
+            dist/QUALIFICATION.json
           if-no-files-found: error
