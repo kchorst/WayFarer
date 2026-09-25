@@ -1,0 +1,6 @@
+{
+  "releaseId": "WAYFINDER-2026-09-25-DEVELOPMENT-GATE",
+  "status": "unverified",
+  "scope": "General runtime-health and persistence ownership; generalized geography/topology/route-role validation; adversarial rendered acceptance; native-Windows evidence required before promotion.",
+  "version": "1.2.1"
+}

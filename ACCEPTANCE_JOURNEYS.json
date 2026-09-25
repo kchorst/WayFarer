@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "journeys": [
+    {
+      "id": "immediate-trip-basics",
+      "guideMarker": "RM-IMMEDIATE-TRIP-BASICS",
+      "required": true
+    },
+    {
+      "id": "single-app-lifecycle-ui",
+      "guideMarker": "RM-SINGLE-APP-LIFECYCLE",
+      "required": true
+    },
+    {
+      "id": "home-local-service-health",
+      "guideMarker": "RM-HOME-SERVICE-HEALTH",
+      "required": true
+    },
+    {
+      "id": "fresh-spark-prompt-clean",
+      "guideMarker": "RM-FRESH-SPARK-PROMPT",
+      "required": true
+    },
+    {
+      "id": "background-feedback",
+      "guideMarker": "RM-BACKGROUND-FEEDBACK",
+      "required": true
+    },
+    {
+      "id": "corsica-geographic-scope",
+      "guideMarker": "RM-CORSICA-SCOPE",
+      "required": true
+    },
+    {
+      "id": "sardinia-corsica-multi-area",
+      "guideMarker": "RM-SARDINIA-CORSICA",
+      "required": true
+    },
+    {
+      "id": "shikoku",
+      "guideMarker": "RM-SHIKOKU",
+      "required": true
+    },
+    {
+      "id": "sicily-loop-open-gateway",
+      "guideMarker": "RM-SICILY-OPEN",
+      "required": true
+    },
+    {
+      "id": "palermo-loop",
+      "guideMarker": "RM-PALERMO-LOOP",
+      "required": true
+    },
+    {
+      "id": "crete-loop",
+      "guideMarker": "RM-CRETE-LOOP",
+      "required": true
+    },
+    {
+      "id": "paris-london-one-way",
+      "guideMarker": "RM-PARIS-LONDON",
+      "required": true
+    },
+    {
+      "id": "baltic-one-way-scope-semantics",
+      "guideMarker": "RM-BALTIC-ONE-WAY-SCOPE",
+      "required": true
+    },
+    {
+      "id": "generic-semantic-invariant-matrix",
+      "guideMarker": "RM-GENERIC-SEMANTIC-MATRIX",
+      "required": true
+    },
+    {
+      "id": "geography-verification-fail-closed",
+      "guideMarker": "RM-GEOGRAPHY-FAIL-CLOSED",
+      "required": true
+    },
+    {
+      "id": "trip-basics-contradiction-block",
+      "guideMarker": "RM-BASICS-CONTRADICTION",
+      "required": true
+    },
+    {
+      "id": "stale-spark-navigation-cancel",
+      "guideMarker": "RM-STALE-SPARK-CANCEL",
+      "required": true
+    },
+    {
+      "id": "spark-return-navigation",
+      "guideMarker": "RM-SPARK-RETURN",
+      "required": true
+    },
+    {
+      "id": "precision-loop-to-flexible",
+      "guideMarker": "RM-PRECISION-ATOMIC",
+      "required": true
+    },
+    {
+      "id": "route-resolution",
+      "guideMarker": "RM-ROUTE-RESOLUTION",
+      "required": true
+    },
+    {
+      "id": "export-import-persistence",
+      "guideMarker": "RM-EXPORT-IMPORT",
+      "required": true
+    },
+    {
+      "id": "document-preferences-citations",
+      "guideMarker": "RM-DOCUMENT-CITATIONS",
+      "required": true
+    },
+    {
+      "id": "serial-local-model-jamaica",
+      "guideMarker": "RM-SERIAL-LOCAL-MODEL",
+      "required": true
+    },
+    {
+      "id": "slow-model-first-useful-skeleton",
+      "guideMarker": "RM-SLOW-MODEL-FIRST-SKELETON",
+      "required": true
+    },
+    {
+      "id": "guide-executable-controls",
+      "guideMarker": "RM-GUIDE-EXECUTABLE-CONTROLS",
+      "required": true
+    }
+  ]
+}

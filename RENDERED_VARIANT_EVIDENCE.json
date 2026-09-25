@@ -1,0 +1,182 @@
+{
+  "releaseId": "WAYFINDER-2026-09-25-DEVELOPMENT-GATE",
+  "verdict": "PASS",
+  "criticalHash": "f898660a7f3d263583f883cb40006a2ec15c21059750b7d4a156adf6c0dc3873",
+  "createdAt": "2026-09-25T21:52:37Z",
+  "engine": "Chromium rendered canonical-family four-variant matrix (isolated parallel family processes)",
+  "requiredFamilies": [
+    "vague-named-route",
+    "island-loop",
+    "one-way-city-anchors",
+    "multi-country-route",
+    "multi-area-island",
+    "revision",
+    "precision",
+    "mapping",
+    "documentation",
+    "return-to-spark",
+    "save-reload-import"
+  ],
+  "requiredVariants": [
+    "normal",
+    "contradictory",
+    "degraded",
+    "navigation"
+  ],
+  "families": {
+    "vague-named-route": {
+      "normal": {
+        "status": "PASS"
+      },
+      "contradictory": {
+        "status": "PASS"
+      },
+      "degraded": {
+        "status": "PASS"
+      },
+      "navigation": {
+        "status": "PASS"
+      }
+    },
+    "island-loop": {
+      "normal": {
+        "status": "PASS"
+      },
+      "contradictory": {
+        "status": "PASS"
+      },
+      "degraded": {
+        "status": "PASS"
+      },
+      "navigation": {
+        "status": "PASS"
+      }
+    },
+    "one-way-city-anchors": {
+      "normal": {
+        "status": "PASS"
+      },
+      "contradictory": {
+        "status": "PASS"
+      },
+      "degraded": {
+        "status": "PASS"
+      },
+      "navigation": {
+        "status": "PASS"
+      }
+    },
+    "multi-country-route": {
+      "normal": {
+        "status": "PASS"
+      },
+      "contradictory": {
+        "status": "PASS"
+      },
+      "degraded": {
+        "status": "PASS"
+      },
+      "navigation": {
+        "status": "PASS"
+      }
+    },
+    "multi-area-island": {
+      "normal": {
+        "status": "PASS"
+      },
+      "contradictory": {
+        "status": "PASS"
+      },
+      "degraded": {
+        "status": "PASS"
+      },
+      "navigation": {
+        "status": "PASS"
+      }
+    },
+    "revision": {
+      "normal": {
+        "status": "PASS"
+      },
+      "contradictory": {
+        "status": "PASS"
+      },
+      "degraded": {
+        "status": "PASS"
+      },
+      "navigation": {
+        "status": "PASS"
+      }
+    },
+    "precision": {
+      "normal": {
+        "status": "PASS"
+      },
+      "contradictory": {
+        "status": "PASS"
+      },
+      "degraded": {
+        "status": "PASS"
+      },
+      "navigation": {
+        "status": "PASS"
+      }
+    },
+    "mapping": {
+      "normal": {
+        "status": "PASS"
+      },
+      "contradictory": {
+        "status": "PASS"
+      },
+      "degraded": {
+        "status": "PASS"
+      },
+      "navigation": {
+        "status": "PASS"
+      }
+    },
+    "documentation": {
+      "normal": {
+        "status": "PASS"
+      },
+      "contradictory": {
+        "status": "PASS"
+      },
+      "degraded": {
+        "status": "PASS"
+      },
+      "navigation": {
+        "status": "PASS"
+      }
+    },
+    "return-to-spark": {
+      "normal": {
+        "status": "PASS"
+      },
+      "contradictory": {
+        "status": "PASS"
+      },
+      "degraded": {
+        "status": "PASS"
+      },
+      "navigation": {
+        "status": "PASS"
+      }
+    },
+    "save-reload-import": {
+      "normal": {
+        "status": "PASS"
+      },
+      "contradictory": {
+        "status": "PASS"
+      },
+      "degraded": {
+        "status": "PASS"
+      },
+      "navigation": {
+        "status": "PASS"
+      }
+    }
+  }
+}

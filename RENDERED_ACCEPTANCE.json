@@ -1,0 +1,140 @@
+{
+  "releaseId": "WAYFINDER-2026-09-25-DEVELOPMENT-GATE",
+  "verdict": "PASS",
+  "criticalHash": "f898660a7f3d263583f883cb40006a2ec15c21059750b7d4a156adf6c0dc3873",
+  "createdAt": "2026-09-25T21:53:14Z",
+  "engine": "Chromium rendered DOM via Playwright with deterministic mocked local services",
+  "scenarios": [
+    {
+      "id": "immediate-trip-basics",
+      "status": "PASS",
+      "tripBasicsVisibleMs": 97
+    },
+    {
+      "id": "single-app-lifecycle-ui",
+      "status": "PASS",
+      "exitControlVisible": true,
+      "pagehideCloseWired": true
+    },
+    {
+      "id": "home-local-service-health",
+      "status": "PASS",
+      "offlineVisible": true,
+      "recheckRecovered": true
+    },
+    {
+      "id": "fresh-spark-prompt-clean",
+      "status": "PASS",
+      "orphanPromptDiscarded": true
+    },
+    {
+      "id": "background-feedback",
+      "status": "PASS",
+      "firstVisibleConcepts": 1,
+      "firstIdeaAfterConfirmMs": 43
+    },
+    {
+      "id": "corsica-geographic-scope",
+      "status": "PASS",
+      "visibleConcepts": 3
+    },
+    {
+      "id": "sardinia-corsica-multi-area",
+      "status": "PASS",
+      "firstIdeaAfterConfirmMs": 40
+    },
+    {
+      "id": "shikoku",
+      "status": "PASS"
+    },
+    {
+      "id": "sicily-loop-open-gateway",
+      "status": "PASS"
+    },
+    {
+      "id": "palermo-loop",
+      "status": "PASS"
+    },
+    {
+      "id": "crete-loop",
+      "status": "PASS"
+    },
+    {
+      "id": "paris-london-one-way",
+      "status": "PASS"
+    },
+    {
+      "id": "baltic-one-way-scope-semantics",
+      "status": "PASS",
+      "visibleConcepts": 3
+    },
+    {
+      "id": "generic-semantic-invariant-matrix",
+      "status": "PASS",
+      "visibleConcepts": 3
+    },
+    {
+      "id": "geography-verification-fail-closed",
+      "status": "PASS",
+      "visibleConcepts": 3,
+      "unverifiedCandidateVisibleAndBlocked": true
+    },
+    {
+      "id": "trip-basics-contradiction-block",
+      "status": "PASS",
+      "contradictionBlocked": true
+    },
+    {
+      "id": "stale-spark-navigation-cancel",
+      "status": "PASS",
+      "staleExplorationDiscarded": true
+    },
+    {
+      "id": "spark-return-navigation",
+      "status": "PASS"
+    },
+    {
+      "id": "precision-loop-to-flexible",
+      "status": "PASS"
+    },
+    {
+      "id": "route-resolution",
+      "status": "PASS",
+      "resolutionStatus": "4/4 occurrences resolved.",
+      "offlineDegradedVisible": true
+    },
+    {
+      "id": "export-import-persistence",
+      "status": "PASS",
+      "exportImportRestored": true
+    },
+    {
+      "id": "document-preferences-citations",
+      "status": "PASS"
+    },
+    {
+      "id": "serial-local-model-jamaica",
+      "status": "PASS",
+      "firstUsefulValidatedSkeletonMs": 305,
+      "maxConcurrentLocalModelJobs": 1,
+      "jamaicaRegression": true
+    },
+    {
+      "id": "slow-model-first-useful-skeleton",
+      "status": "PASS",
+      "simulatedFirstStreamDelayMs": 12500,
+      "firstUsefulValidatedSkeletonMs": 8530,
+      "invalidSlowSkeletonRejected": true
+    },
+    {
+      "id": "guide-executable-controls",
+      "status": "PASS",
+      "settingsExecuted": true,
+      "sparkExecuted": true,
+      "refineExecuted": true,
+      "precisionExecuted": true,
+      "mappingControlsRendered": true,
+      "documentationExecuted": true
+    }
+  ]
+}

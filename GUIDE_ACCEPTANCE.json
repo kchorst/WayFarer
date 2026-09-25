@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "sections": [
+    {
+      "id": "1-start-exit",
+      "required": true,
+      "nativeWindows": true,
+      "renderedScenarios": [
+        "single-app-lifecycle-ui"
+      ]
+    },
+    {
+      "id": "2-settings",
+      "required": true,
+      "renderedScenarios": [
+        "guide-executable-controls",
+        "home-local-service-health"
+      ]
+    },
+    {
+      "id": "3-spark",
+      "required": true,
+      "renderedScenarios": [
+        "immediate-trip-basics",
+        "background-feedback",
+        "serial-local-model-jamaica",
+        "slow-model-first-useful-skeleton",
+        "geography-verification-fail-closed",
+        "trip-basics-contradiction-block",
+        "stale-spark-navigation-cancel"
+      ]
+    },
+    {
+      "id": "4-refine",
+      "required": true,
+      "matrixCells": [
+        "revision/normal",
+        "revision/contradictory",
+        "revision/degraded",
+        "revision/navigation"
+      ]
+    },
+    {
+      "id": "5-precision",
+      "required": true,
+      "renderedScenarios": [
+        "precision-loop-to-flexible"
+      ],
+      "matrixCells": [
+        "precision/normal",
+        "precision/contradictory",
+        "precision/degraded",
+        "precision/navigation"
+      ]
+    },
+    {
+      "id": "6-resolve-route",
+      "required": true,
+      "renderedScenarios": [
+        "route-resolution"
+      ],
+      "matrixCells": [
+        "mapping/normal",
+        "mapping/degraded"
+      ]
+    },
+    {
+      "id": "7-route-visual",
+      "required": true,
+      "renderedScenarios": [
+        "guide-executable-controls"
+      ],
+      "matrixCells": [
+        "mapping/normal",
+        "mapping/contradictory",
+        "mapping/degraded",
+        "mapping/navigation"
+      ]
+    },
+    {
+      "id": "8-documentation",
+      "required": true,
+      "renderedScenarios": [
+        "document-preferences-citations"
+      ],
+      "matrixCells": [
+        "documentation/normal",
+        "documentation/contradictory",
+        "documentation/degraded",
+        "documentation/navigation"
+      ]
+    },
+    {
+      "id": "9-persistence",
+      "required": true,
+      "renderedScenarios": [
+        "export-import-persistence"
+      ],
+      "matrixCells": [
+        "save-reload-import/normal",
+        "save-reload-import/contradictory",
+        "save-reload-import/degraded",
+        "save-reload-import/navigation"
+      ]
+    },
+    {
+      "id": "10-offline",
+      "required": true,
+      "matrixCells": [
+        "mapping/degraded",
+        "documentation/degraded",
+        "one-way-city-anchors/degraded"
+      ]
+    },
+    {
+      "id": "11-time-status",
+      "required": true,
+      "renderedScenarios": [
+        "serial-local-model-jamaica",
+        "slow-model-first-useful-skeleton",
+        "background-feedback"
+      ],
+      "matrixCells": [
+        "documentation/degraded"
+      ]
+    },
+    {
+      "id": "12-troubleshooting",
+      "required": true,
+      "renderedScenarios": [
+        "home-local-service-health",
+        "geography-verification-fail-closed",
+        "guide-executable-controls"
+      ],
+      "matrixCells": [
+        "mapping/contradictory",
+        "mapping/degraded",
+        "save-reload-import/contradictory",
+        "save-reload-import/degraded"
+      ]
+    },
+    {
+      "id": "13-verify-package",
+      "required": true,
+      "nativeWindows": true,
+      "renderedScenarios": [
+        "guide-executable-controls"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WAYFINDER</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div><div class="eyebrow">LOCAL-FIRST TRAVEL PLANNER</div><div class="brand-row"><h1>WAYFINDER</h1><span id="buildBadge" class="build-badge">build unknown</span></div></div>
+    <div class="top-actions"><span id="runtimeBadge" class="badge">Checking local model…</span><span id="referenceBadge" class="badge">Checking Kiwix…</span><button id="checkServicesBtn" class="ghost">Check local services</button><button id="settingsBtn" class="ghost">Settings</button><button id="exportBtn" class="ghost">Export trip</button><label class="ghost file-btn">Import trip<input id="importFile" type="file" accept="application/json" hidden></label><button id="resetBtn" class="ghost danger">New trip</button><button id="exitBtn" class="ghost danger">Exit WAYFINDER</button></div>
+  </header>
+
+  <main>
+    <section class="hero card">
+      <div class="section-head"><div><span class="step">1 · SPARK</span><h2>Where do you want to go?</h2></div><span class="subtle">Suggestions only until you choose one.</span></div>
+      <div id="sparkComposer">
+        <textarea id="brief" rows="3" autocomplete="off" autocapitalize="sentences" spellcheck="true" placeholder="Example: I have one month to travel around Italy, starting and ending in Genoa. I want Sicily included and I prefer buses."></textarea>
+        <div class="action-row"><button id="sparkBtn" class="primary">Explore trip ideas</button><button id="blankBtn" class="ghost">Start in Precision</button></div>
+        <div id="sparkStatus" class="inline-status query-status" role="status" aria-live="polite"></div>
+        <section id="tripBasicsPanel" class="trip-basics" hidden>
+          <div class="trip-basics-head"><div><span class="step">CONFIRM TRIP BASICS</span><h3>Before WAYFINDER builds your ideas</h3></div><span class="subtle">Confirm what matters. Leave the rest open.</span></div>
+          <div class="basics-request"><span class="context-label">Your request</span><div id="tripBasicsPrompt" class="context-text"></div></div>
+          <div class="trip-feedback" aria-live="polite">
+            <div><span class="context-label">What WAYFINDER understood immediately</span><div id="tripBasicsSignals" class="spark-signal-chips"></div></div>
+            <div class="background-prep"><span class="live-dot" aria-hidden="true"></span><span id="sparkLiveStatus">Background preparation will start after this card appears.</span></div>
+            <div id="backgroundSignals" class="spark-signal-chips background-signals"></div>
+          </div>
+          <div id="recognizedTripBox" class="recognized-trip" hidden></div>
+          <div class="form-grid basics-grid">
+            <label>Destinations / trip area<input id="basicsDestination" placeholder="Open — let WAYFINDER infer the area"><small id="basicsDestinationMeta" class="field-meta"></small></label>
+            <label>Start<input id="basicsStart" placeholder="Open — suggest for me"><small id="basicsStartMeta" class="field-meta"></small></label>
+            <label>Finish<input id="basicsEnd" placeholder="Open — suggest for me"><small id="basicsEndMeta" class="field-meta"></small></label>
+            <label>Duration<input id="basicsDuration" placeholder="Open — e.g. 3 weeks or 7–10 days"><small id="basicsDurationMeta" class="field-meta"></small></label>
+            <label>Trip shape<select id="basicsTopology"><option value="">Open — show possibilities</option><option value="loop">Loop</option><option value="one_way">One-way</option><option value="open_jaw">Open-jaw</option><option value="flexible">Flexible</option><option value="circumnavigation">Circumnavigation</option></select><small id="basicsTopologyMeta" class="field-meta"></small></label>
+          </div>
+          <div class="action-row"><button id="confirmBasicsBtn" class="primary">Confirm &amp; build ideas</button><button id="editSparkPromptBtn" class="ghost">Edit original request</button></div>
+          <div id="tripBasicsStatus" class="inline-status" role="status" aria-live="polite"></div>
+        </section>
+        <div id="sparkSignals" class="spark-signals" hidden></div>
+      </div>
+      <div id="proposals" class="proposal-grid"></div>
+    </section>
+
+    <section id="workspace" hidden>
+      <div class="workspace-tools"><button id="sparkReturnBtn" class="ghost small">← Spark ideas & original request</button></div>
+      <nav class="tabs" aria-label="Trip workflow">
+        <button data-tab="revision">Refine</button><button data-tab="precision" class="active">Precision</button><button data-tab="mapping">Route visual</button><button data-tab="document">Documentation</button>
+      </nav>
+
+      <section id="tab-revision" class="tab-panel card" hidden>
+        <div class="section-head"><div><span class="step">2 · REFINE</span><h2>Refine the selected trip</h2></div><span class="subtle">Only the requested delta is applied.</span></div>
+        <div class="request-context">
+          <div><span class="context-label">Original Spark request</span><div id="originalRequestText" class="context-text"></div></div>
+          <div><span class="context-label">Current selected route</span><div id="selectedTripContext" class="context-route"></div></div>
+          <div class="context-actions"><button id="refineBackToSparkBtn" class="ghost small">Back to Spark ideas</button><button id="editOriginalRequestBtn" class="ghost small">Edit original request</button></div>
+        </div>
+        <label class="revision-label">What do you want to change?<textarea id="revisionText" rows="4" placeholder="Describe only the change you want. Example: change the end city and keep everything else unless I explicitly ask otherwise."></textarea></label>
+        <div class="action-row"><button id="revisionBtn" class="primary">Apply revision</button></div>
+        <div id="revisionStatus" class="inline-status"></div>
+        <div id="revisionLog" class="log"></div>
+      </section>
+
+      <section id="tab-precision" class="tab-panel card">
+        <div class="section-head"><div><span class="step">3 · PRECISION</span><h2>Authoritative trip</h2></div><span id="tripMeta" class="subtle"></span></div>
+        <div id="precisionBoundarySummary" class="precision-boundaries"></div>
+        <div class="form-grid three">
+          <label>Topology<select id="topologyInput"><option value="flexible">Flexible</option><option value="loop">Loop</option><option value="one_way">One-way</option><option value="open_jaw">Open-jaw</option><option value="circumnavigation">Circumnavigation</option></select></label>
+          <label>Duration type<select id="durationKindInput"><option value="none">Not specified</option><option value="flexible">Flexible</option><option value="exact">Exact</option><option value="range">Range</option></select></label>
+          <label id="durationExactWrap">Exact days<input id="durationDaysInput" type="number" min="1"></label>
+          <label id="durationMinWrap" hidden>Minimum days<input id="durationMinInput" type="number" min="1"></label>
+          <label id="durationMaxWrap" hidden>Maximum days<input id="durationMaxInput" type="number" min="1"></label>
+          <label>Start date<input id="startDateInput" type="date"></label>
+          <label>End date<input id="endDateInput" type="date"></label>
+          <label>Season / timing note<input id="seasonInput" placeholder="e.g. late spring"></label>
+          <label>Transport<select id="transportInput"><option>Any</option><option>Car</option><option>Train</option><option>Bus</option><option>Ferry</option><option>Walk</option><option>Bike</option><option>Air</option><option>Mixed</option></select></label>
+          <label class="check"><input id="transportConfirmed" type="checkbox"> Traveler confirmed trip-wide transport</label>
+          <label>Geographic scopes<textarea id="scopesInput" rows="2" placeholder="One scope per line; commas stay inside place names"></textarea></label>
+          <label>Home/origin (not a route stop)<input id="homeOriginInput" placeholder="Queens, NY"></label>
+          <label>Experiences<textarea id="experiencesInput" rows="2" placeholder="One per line"></textarea></label>
+        </div>
+        <div class="route-editor-head"><h3>Canonical route occurrences</h3><button id="addStopBtn" class="ghost small">+ Add stop</button></div>
+        <div id="routeEditor" class="route-editor"></div>
+        <div class="route-editor-head"><h3>Per-leg transport overrides</h3><span class="subtle">Optional; Any means use the trip-wide transport choice.</span></div>
+        <div id="legTransportEditor" class="leg-editor"></div>
+        <details class="details"><summary>Traveler commitments, exclusions & passports</summary>
+          <div class="form-grid two inner">
+            <label>Commitments<textarea id="commitmentsInput" rows="3" placeholder="One per line"></textarea></label>
+            <label>Excluded places (not routed)<textarea id="excludedPlacesInput" rows="3" placeholder="One place per line"></textarea></label>
+            <label>Other exclusions / constraints<textarea id="exclusionsInput" rows="3" placeholder="One per line"></textarea></label>
+            <label>Scoped transport<textarea id="scopedTransportInput" rows="3" placeholder="One per line: Sicily | Ferry"></textarea></label>
+            <label>Traveler/passport context<textarea id="travelersInput" rows="3" placeholder="Example: Traveler 1 — Rwanda passport; US permanent resident"></textarea></label>
+          </div>
+        </details>
+        <div class="action-row"><button id="savePrecisionBtn" class="primary">Save Precision</button><button id="discardPrecisionBtn" class="ghost">Discard unsaved changes</button><button id="resolveBtn" class="ghost">Resolve saved route</button></div>
+        <div id="precisionStatus" class="inline-status"></div>
+      </section>
+
+      <section id="tab-mapping" class="tab-panel card" hidden>
+        <div class="section-head"><div><span class="step">4 · ROUTE VISUAL</span><h2>Route visual</h2></div><span id="mapEvidence" class="subtle"></span></div>
+        <div id="mapWarnings" class="findings"></div>
+        <div id="mapStatus" class="inline-status"></div>
+        <div id="mapCanvas" class="map-canvas"><div class="map-empty">Resolve the route to build the map.</div></div>
+        <div class="provider-row">
+          <button id="mapResolveBtn" class="ghost">Resolve route</button>
+          <button id="routeMapQuestBtn" class="ghost">Route with MapQuest</button>
+          <button id="offlinePbfBtn" class="ghost">Load offline map</button>
+          <a id="googleBtn" class="button-link ghost disabled" target="_blank" rel="noreferrer">Open same route in Google Maps</a>
+          <a id="mapQuestShareBtn" class="button-link ghost disabled" target="_blank" rel="noreferrer">Open same route in MapQuest</a>
+        </div>
+        <div class="map-facts">
+          <div><b>Coordinate resolution</b><span id="coordinateFact">—</span></div>
+          <div><b>MapQuest geometry</b><span id="mapQuestFact">—</span></div>
+          <div><b>Offline PBF</b><span id="pbfFact">—</span></div>
+        </div>
+      </section>
+
+      <section id="tab-document" class="tab-panel card" hidden>
+        <div class="section-head"><div><span class="step">5 · DOCUMENTATION</span><h2>Travel document</h2></div><span class="subtle">Generated from a frozen authority snapshot.</span></div>
+        <div class="document-preferences">
+          <div class="route-editor-head"><h3>Document sections</h3><span class="subtle">Saved with this trip. Sources are added automatically when local evidence is used.</span></div>
+          <div id="documentSections" class="document-section-grid"></div>
+        </div>
+        <div class="action-row"><button id="documentBtn" class="primary">Build document</button><button id="copyDocBtn" class="ghost">Copy</button></div>
+        <div id="documentStatus" class="inline-status"></div>
+        <article id="documentOutput" class="document-output"></article>
+      </section>
+    </section>
+  </main>
+
+
+  <dialog id="settingsDialog" class="settings-dialog">
+    <form method="dialog" class="settings-shell" id="settingsForm">
+      <div class="section-head settings-head"><div><span class="step">SETTINGS</span><h2>Local services & offline maps</h2></div><button value="cancel" class="ghost small" aria-label="Close settings">Close</button></div>
+      <div class="settings-status-grid">
+        <div><b>Local AI</b><span id="settingsAiStatus">Checking…</span></div>
+        <div><b>Local references</b><span id="settingsRefStatus">Checking…</span></div>
+        <div><b>MapQuest</b><span id="settingsMapQuestStatus">Checking…</span></div>
+        <div><b>Offline maps</b><span id="settingsPbfStatus">Checking…</span></div>
+      </div>
+      <div class="form-grid two settings-grid">
+        <label>Local AI endpoint<input id="settingsAiEndpoint" placeholder="Blank = auto-detect localhost 8080 / 1234 / 11434"></label>
+        <label>Model name<input id="settingsAiModel" placeholder="Blank = auto-detect"></label>
+        <label>Kiwix / local references<input id="settingsReferenceEndpoint" placeholder="http://127.0.0.1:8091"></label>
+        <label>Local gazetteer endpoint<input id="settingsGazetteerEndpoint" placeholder="Optional local geocoder"></label>
+        <label>MapQuest API key<input id="settingsMapQuestKey" type="password" autocomplete="off" placeholder="Leave blank to keep existing key"></label>
+        <label>Offline map library folder<div class="input-with-button"><input id="settingsPbfRoot" placeholder="Example: C:\OpenStreetMap\Geofabrik"><button id="browsePbfRootBtn" type="button" class="ghost small">Browse…</button></div></label>
+        <label class="check"><input id="settingsAllowWebGeocode" type="checkbox"> Allow online geocoding fallback when online</label>
+        <label class="check"><input id="settingsRemoveMapQuest" type="checkbox"> Remove saved MapQuest key</label>
+      </div>
+      <div class="action-row"><button id="saveSettingsBtn" type="button" class="primary">Save settings</button><button id="refreshSettingsBtn" type="button" class="ghost">Refresh status</button></div>
+      <div id="settingsStatus" class="inline-status"></div>
+      <details class="details"><summary>Offline map diagnostics</summary><pre id="settingsPbfDiagnostics" class="diagnostics"></pre></details>
+    </form>
+  </dialog>
+
+  <template id="stopRowTemplate">
+    <div class="route-row">
+      <div class="drag-index"></div>
+      <input class="stop-label" aria-label="Route place">
+      <select class="stop-role" aria-label="Derived route role" disabled><option value="start">start</option><option value="visit">visit</option><option value="end">end</option></select>
+      <select class="stop-disposition" aria-label="Disposition"><option value="required">required</option><option value="optional">optional</option><option value="transit_only">transit only</option></select>
+      <select class="stop-stay-kind" aria-label="Stay"><option value="flexible">flexible stay</option><option value="exact">exact</option><option value="minimum">at least</option><option value="maximum">at most</option><option value="none">no stay</option></select>
+      <input class="stop-stay-days" type="number" min="0" aria-label="Stay days" placeholder="days">
+      <div class="row-buttons"><button class="move-up ghost small" title="Move up">↑</button><button class="move-down ghost small" title="Move down">↓</button><button class="delete-stop ghost small danger" title="Delete">×</button></div>
+    </div>
+  </template>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
