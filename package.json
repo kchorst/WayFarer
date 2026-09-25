@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node scripts/run-tests.mjs",
     "check": "npm test && npm run syntax && npm run smoke && npm run integrity",
     "smoke": "node tests/runtime-smoke.mjs",
     "syntax": "node verify-source.mjs",
@@ -16,6 +16,6 @@
     "rendered:matrix": "python tests/release-rendered-matrix-all.py"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   }
 }

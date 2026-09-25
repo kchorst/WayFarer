@@ -1,0 +1,28 @@
+name: Development Gate
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  fast-gates:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Unit and integration
+        run: npm test
+      - name: Syntax
+        run: npm run syntax
+      - name: Runtime smoke
+        run: npm run smoke
+      - name: Hostile / property audit
+        run: npm run audit:hostile
