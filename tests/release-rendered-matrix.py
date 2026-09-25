@@ -5,7 +5,7 @@ import importlib.util,json,time,traceback,sys,os
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('rr',ROOT/'tests'/'release-rendered.py')
 rr=importlib.util.module_from_spec(spec);spec.loader.exec_module(rr)
-RELEASE=json.loads((ROOT/'RELEASE.json').read_text())
+RELEASE=json.loads((ROOT/'RELEASE.json').read_text(encoding='utf-8'))
 VARIANTS=('normal','contradictory','degraded','navigation')
 
 

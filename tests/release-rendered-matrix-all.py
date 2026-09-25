@@ -5,7 +5,7 @@ import subprocess,os,json,time,sys
 ROOT=Path(__file__).resolve().parents[1]
 FAMILIES=['vague-named-route','island-loop','one-way-city-anchors','multi-country-route','multi-area-island','revision','precision','mapping','documentation','return-to-spark','save-reload-import']
 VARIANTS=['normal','contradictory','degraded','navigation']
-release=json.loads((ROOT/'RELEASE.json').read_text())
+release=json.loads((ROOT/'RELEASE.json').read_text(encoding='utf-8'))
 
 
 def run_family(family):

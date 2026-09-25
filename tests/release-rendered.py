@@ -4,9 +4,9 @@ import re,posixpath,json,hashlib,time,sys,traceback,os
 
 ROOT=Path(__file__).resolve().parents[1]
 PUB=ROOT/'public'
-RELEASE=json.loads((ROOT/'RELEASE.json').read_text())
-ACCEPTANCE=json.loads((ROOT/'ACCEPTANCE_JOURNEYS.json').read_text())
-CRITICAL=json.loads((ROOT/'RELEASE_CRITICAL_FILES.json').read_text())['files']
+RELEASE=json.loads((ROOT/'RELEASE.json').read_text(encoding='utf-8'))
+ACCEPTANCE=json.loads((ROOT/'ACCEPTANCE_JOURNEYS.json').read_text(encoding='utf-8'))
+CRITICAL=json.loads((ROOT/'RELEASE_CRITICAL_FILES.json').read_text(encoding='utf-8'))['files']
 
 def critical_hash():
     h=hashlib.sha256()
@@ -14,10 +14,10 @@ def critical_hash():
         h.update(rel.encode());h.update(b'\0');h.update((ROOT/rel).read_bytes());h.update(b'\0')
     return h.hexdigest()
 
-html=(PUB/'index.html').read_text()
-html=re.sub(r'<link[^>]+href="/styles\.css"[^>]*>',f'<style>{(PUB/"styles.css").read_text()}</style>',html)
+html=(PUB/'index.html').read_text(encoding='utf-8')
+html=re.sub(r'<link[^>]+href="/styles\.css"[^>]*>',f'<style>{(PUB/"styles.css").read_text(encoding='utf-8')}</style>',html)
 html=re.sub(r'<script type="module" src="/app\.js"></script>','',html)
-mods={p.relative_to(PUB).as_posix():p.read_text() for p in [PUB/'app.js',*list((PUB/'core').glob('*.js'))]}
+mods={p.relative_to(PUB).as_posix():p.read_text(encoding='utf-8') for p in [PUB/'app.js',*list((PUB/'core').glob('*.js'))]}
 imp_re=re.compile(r"(from\s+['\"])(\.?\.?/[^'\"]+)(['\"])")
 
 def deps(rel):

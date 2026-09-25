@@ -5,7 +5,7 @@ DEBUG=os.environ.get('CHROME_DEBUG','http://127.0.0.1:9222')
 APP_URL=os.environ.get('WAYFINDER_BROWSER_URL','http://127.0.0.1:8099/')
 if os.environ.get('WAYFINDER_DATA_HARNESS')=='1':
     root=Path(__file__).resolve().parents[1]
-    html=(root/'public'/'index.html').read_text()
+    html=(root/'public'/'index.html').read_text(encoding='utf-8')
     storage="""<script>
     (()=>{const read=()=>{try{return JSON.parse(window.name||'{}')}catch{return {}}};
     Object.defineProperty(window,'localStorage',{configurable:true,value:{
