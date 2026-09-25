@@ -1,0 +1,76 @@
+name: Frozen Windows Release Gate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Playwright
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright
+          python -m playwright install chromium
+      - name: Source gates
+        run: |
+          npm test
+          npm run syntax
+          npm run smoke
+          npm run audit:hostile
+      - name: Regenerate rendered evidence for this exact source
+        run: |
+          python tests/release-rendered.py
+          python tests/release-rendered-matrix-all.py
+      - name: Stage exact candidate and manifest
+        run: node scripts/stage-release.mjs
+      - name: Create exact candidate ZIP
+        shell: pwsh
+        run: Compress-Archive -Path dist\WAYFINDER -DestinationPath dist\WAYFINDER-CANDIDATE.zip -CompressionLevel Optimal
+      - name: Native Windows lifecycle on exact ZIP
+        shell: pwsh
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File tests\windows-lifecycle-native.ps1 -ZipPath dist\WAYFINDER-CANDIDATE.zip -EvidenceOut dist\windows-evidence.json
+      - name: Clean extract exact ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist\exact | Out-Null
+          Expand-Archive -Path dist\WAYFINDER-CANDIDATE.zip -DestinationPath dist\exact -Force
+          (Get-FileHash dist\WAYFINDER-CANDIDATE.zip -Algorithm SHA256).Hash.ToLowerInvariant() | Set-Content dist\zip.sha256
+      - name: Read-only exact-package gates
+        shell: pwsh
+        run: |
+          cd dist\exact\WAYFINDER
+          node verify-integrity.mjs
+          npm test
+          npm run syntax
+          npm run smoke
+          npm run audit:hostile
+          python tests\release-rendered.py --no-write
+          python tests\release-rendered-matrix-all.py --no-write
+      - name: Independent Release Manager gate
+        shell: pwsh
+        run: |
+          $hash=(Get-Content dist\zip.sha256).Trim()
+          $env:WAYFINDER_WINDOWS_EVIDENCE=(Resolve-Path dist\windows-evidence.json).Path
+          $env:WAYFINDER_EXACT_ZIP_SHA256=$hash
+          cd dist\exact\WAYFINDER
+          node release-gate.mjs
+      - name: Publish traveler artifact only after every gate above passes
+        uses: actions/upload-artifact@v4
+        with:
+          name: WAYFINDER-WINDOWS-QUALIFIED
+          path: dist/WAYFINDER-CANDIDATE.zip
+          if-no-files-found: error
