@@ -149,10 +149,10 @@ test('Trip Basics ships as the fast gate before ideas and supports open answers 
 
 test('downstream stages never secretly commit an unsaved Precision draft',()=>{
   const slices=[
-    app.match(/async function resolveRoute\([\s\S]*?\n}\n\$\('#resolveBtn'/)?.[0]||'',
-    app.match(/async function routeWithMapQuest\([\s\S]*?\n}\n\$\('#routeMapQuestBtn'/)?.[0]||'',
-    app.match(/async function loadPbfMap\([\s\S]*?\n}\n\$\('#offlinePbfBtn'/)?.[0]||'',
-    app.match(/async function buildDocument\([\s\S]*?\n}\n\$\('#documentBtn'/)?.[0]||'',
+    app.match(/async function resolveRoute\([\s\S]*?\r?\n}\r?\n\$\('#resolveBtn'/)?.[0]||'',
+    app.match(/async function routeWithMapQuest\([\s\S]*?\r?\n}\r?\n\$\('#routeMapQuestBtn'/)?.[0]||'',
+    app.match(/async function loadPbfMap\([\s\S]*?\r?\n}\r?\n\$\('#offlinePbfBtn'/)?.[0]||'',
+    app.match(/async function buildDocument\([\s\S]*?\r?\n}\r?\n\$\('#documentBtn'/)?.[0]||'',
   ]
   assert.ok(slices.every(Boolean),'could not inspect downstream action functions')
   for(const section of slices)assert.doesNotMatch(section,/savePrecision\(/)
