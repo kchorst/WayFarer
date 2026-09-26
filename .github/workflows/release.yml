@@ -52,7 +52,7 @@ jobs:
       - name: Native Windows lifecycle on exact ZIP
         shell: pwsh
         run: |
-          powershell -NoProfile -ExecutionPolicy Bypass -File tests\windows-lifecycle-native.ps1 -ZipPath dist\WAYFINDER-CANDIDATE.zip -EvidenceOut dist\windows-evidence.json
+          & .\tests\windows-lifecycle-native.ps1 -ZipPath dist\WAYFINDER-CANDIDATE.zip -EvidenceOut dist\windows-evidence.json
       - name: Clean extract exact ZIP
         shell: pwsh
         run: |
