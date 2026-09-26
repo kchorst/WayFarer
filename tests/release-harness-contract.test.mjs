@@ -3,6 +3,8 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createHash } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
 
 const ROOT=path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const read=rel=>fs.readFileSync(path.join(ROOT,rel),'utf8')
@@ -88,6 +90,24 @@ test('source workflows catch platform drift before frozen release qualification'
   assert.match(release,/criticalHash/)
   assert.match(dev,/cancel-in-progress: true/)
   assert.match(rendered,/cancel-in-progress: true/)
+})
+
+
+test('all release evidence uses one canonical critical-source hash implementation',()=>{
+  const manifest=JSON.parse(read('RELEASE_CRITICAL_FILES.json'))
+  const h=createHash('sha256')
+  for(const rel of manifest.files||[]){
+    h.update(rel+'\0')
+    h.update(fs.readFileSync(path.join(ROOT,rel)))
+    h.update('\0')
+  }
+  const expected=h.digest('hex')
+  const helper=execFileSync(process.execPath,[path.join(ROOT,'critical-hash.mjs'),ROOT],{encoding:'utf8'}).trim()
+  assert.equal(helper,expected,'canonical critical hash helper must use NUL separators and exact file bytes')
+  assert.match(read('release-gate.mjs'),/computeCriticalHash\(root\)/)
+  assert.match(read('tests/windows-lifecycle-native.ps1'),/critical-hash\.mjs/)
+  assert.match(read('tests/release-rendered.py'),/critical-hash\.mjs/)
+  assert.doesNotMatch(read('tests/windows-lifecycle-native.ps1'),/h\.update\(rel\+['"]\\0['"]\)/,'PowerShell must not carry a second, escaped critical-hash implementation')
 })
 
 test('critical-source manifest covers the complete staged source contract except generated evidence',()=>{

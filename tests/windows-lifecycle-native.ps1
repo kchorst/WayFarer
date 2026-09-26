@@ -42,7 +42,7 @@ try{
   $manifestPath=Join-Path $root 'PACKAGE_INTEGRITY.sha256';$manifestHash=(Get-FileHash -Algorithm SHA256 -LiteralPath $manifestPath).Hash.ToLowerInvariant()
   & node (Join-Path $root 'verify-integrity.mjs')|Out-Null
   if($LASTEXITCODE -ne 0){throw 'Exact ZIP failed complete-tree package integrity verification on Windows.'};$checks.integrityVerified=$true
-  $criticalHash=(& node -e "const fs=require('fs'),crypto=require('crypto'),path=require('path');const root=process.argv[1],m=JSON.parse(fs.readFileSync(path.join(root,'RELEASE_CRITICAL_FILES.json'),'utf8'));const h=crypto.createHash('sha256');for(const rel of m.files){h.update(rel+'\\0');h.update(fs.readFileSync(path.join(root,rel)));h.update('\\0')}process.stdout.write(h.digest('hex'))" $root).Trim()
+  $criticalHash=(& node (Join-Path $root 'critical-hash.mjs') $root).Trim()
   if($LASTEXITCODE -ne 0 -or $criticalHash -notmatch '^[a-f0-9]{64}$'){throw 'Could not compute critical package hash on Windows.'}
 
   # Prepare a valid tiny raw OSM PBF outside the extraction, then point the app to it.

@@ -1,6 +1,6 @@
 from playwright.sync_api import sync_playwright
 from pathlib import Path
-import re,posixpath,json,hashlib,time,sys,traceback,os
+import re,posixpath,json,time,sys,traceback,os,subprocess
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -13,13 +13,9 @@ def launch_chromium(pw):
 PUB=ROOT/'public'
 RELEASE=json.loads((ROOT/'RELEASE.json').read_text(encoding='utf-8'))
 ACCEPTANCE=json.loads((ROOT/'ACCEPTANCE_JOURNEYS.json').read_text(encoding='utf-8'))
-CRITICAL=json.loads((ROOT/'RELEASE_CRITICAL_FILES.json').read_text(encoding='utf-8'))['files']
 
 def critical_hash():
-    h=hashlib.sha256()
-    for rel in CRITICAL:
-        h.update(rel.encode());h.update(b'\0');h.update((ROOT/rel).read_bytes());h.update(b'\0')
-    return h.hexdigest()
+    return subprocess.check_output(['node',str(ROOT/'critical-hash.mjs'),str(ROOT)],text=True,cwd=ROOT).strip()
 
 html=(PUB/'index.html').read_text(encoding='utf-8')
 html=re.sub(r'<link[^>]+href="/styles\.css"[^>]*>',f'<style>{(PUB/"styles.css").read_text(encoding='utf-8')}</style>',html)
