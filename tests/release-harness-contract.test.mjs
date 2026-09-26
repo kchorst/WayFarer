@@ -116,6 +116,8 @@ test('Windows qualification is legacy-parser safe, writes BOM-free lifecycle evi
   assert.equal([...ps].some(ch=>ch.codePointAt(0)>127),false,'native Windows lifecycle script must remain ASCII-safe for Windows PowerShell 5.1 re-entry')
   assert.doesNotMatch(ps,/powershell\.exe/i,'native lifecycle must re-enter through the current PowerShell host, not force Windows PowerShell 5.1')
   assert.match(ps,/\(Get-Process -Id \$PID\)\.Path/)
+  assert.doesNotMatch(ps,/^\s*\$launcher\s*=\s*Start-Process[^\r\n]*-Wait/im,'native lifecycle must not tree-wait on WAYFINDER.cmd because the launcher intentionally leaves the server running')
+  assert.match(ps,/\$launcher\.WaitForExit\(20000\)/,'native lifecycle must wait only for the launcher process itself')
   if(exists('.github/workflows/release.yml')){
     const release=read('.github/workflows/release.yml')
     assert.doesNotMatch(release,/^\s*powershell(?:\.exe)?\s+-NoProfile.*windows-lifecycle-native\.ps1/im,'release workflow must not nest legacy Windows PowerShell for the lifecycle entrypoint')

@@ -50,9 +50,14 @@ try{
   if($LASTEXITCODE -ne 0){throw 'Could not prepare lifecycle PBF fixture.'}
 
   $env:APPDATA=$appData;$env:WAYFINDER_PORT=[string]$port;$env:WAYFINDER_RUNTIME_DIR=$runtime;$env:WAYFINDER_SETTINGS_PATH=$settings;$env:WAYFINDER_REFERENCE_ENDPOINT='http://127.0.0.1:1';$env:WAYFINDER_AI_ENDPOINT='http://127.0.0.1:1';$env:WAYFINDER_ALLOW_WEB_GEOCODE='0';$env:WAYFINDER_NO_BROWSER='1';$env:WAYFINDER_CLIENT_CLOSE_GRACE_MS='800'
-  $launcher=Start-Process -FilePath 'cmd.exe' -ArgumentList '/c',('"'+(Join-Path $root 'WAYFINDER.cmd')+'"') -WorkingDirectory $root -WindowStyle Hidden -PassThru -Wait
+  $launcher=Start-Process -FilePath 'cmd.exe' -ArgumentList '/c',('"'+(Join-Path $root 'WAYFINDER.cmd')+'"') -WorkingDirectory $root -WindowStyle Hidden -PassThru
+  # Do not use Start-Process -Wait here. On Windows, -Wait can wait for the entire
+  # descendant process tree. WAYFINDER.cmd intentionally leaves the managed Node
+  # server running, so tree-waiting can hold this harness until the no-client
+  # startup timer shuts the app down and then falsely report it unreachable.
+  if(-not $launcher.WaitForExit(20000)){$launcher.Kill($true);throw 'WAYFINDER.cmd did not return after starting the managed app.'}
   if($launcher.ExitCode -ne 0){throw "WAYFINDER.cmd returned $($launcher.ExitCode)."};$checks.launcherUsed=$true
-  if(-not (Wait-Http "http://127.0.0.1:$port/api/status" 15)){throw 'WAYFINDER did not become reachable.'};$checks.appReachable=$true
+  if(-not (Wait-Http "http://127.0.0.1:$port/api/status" 15)){throw 'WAYFINDER did not become reachable after the launcher returned.'};$checks.appReachable=$true
   $controlPath=Join-Path $runtime 'server-control.json';$end=(Get-Date).AddSeconds(5);while((Get-Date)-lt $end -and -not (Test-Path -LiteralPath $controlPath)){Start-Sleep -Milliseconds 100};if(-not (Test-Path -LiteralPath $controlPath)){throw 'Runtime control record did not appear.'};$serverPid=[int]((Get-Content -Raw -LiteralPath $controlPath|ConvertFrom-Json).pid)
 
   $headers=@{'X-WAYFINDER-Client'='1'};$client=Post-Json "http://127.0.0.1:$port/api/system/client/register" @{} $headers;$clientId=[string]$client.clientId;if(-not $clientId){throw 'Client session did not register.'}
