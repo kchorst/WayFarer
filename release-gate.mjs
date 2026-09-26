@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
+import { computeCriticalHash } from './critical-hash.mjs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -10,15 +11,12 @@ const sha256=data=>createHash('sha256').update(data).digest('hex')
 const release=await readJson('RELEASE.json')
 const acceptance=await readJson('ACCEPTANCE_JOURNEYS.json')
 const guideAcceptance=await readJson('GUIDE_ACCEPTANCE.json')
-const manifest=await readJson('RELEASE_CRITICAL_FILES.json')
 let evidence
 try{evidence=await readJson('RENDERED_ACCEPTANCE.json')}catch{throw new Error('RELEASE BLOCKED: RENDERED_ACCEPTANCE.json is missing. Rendered traveler walkthroughs have not been proven for this exact build.')}
 let matrixEvidence
 try{matrixEvidence=await readJson('RENDERED_VARIANT_EVIDENCE.json')}catch{throw new Error('RELEASE BLOCKED: RENDERED_VARIANT_EVIDENCE.json is missing. The canonical four-variant rendered matrix has not been proven for this exact build.')}
 
-const hash=createHash('sha256')
-for(const rel of manifest.files||[]){hash.update(rel+'\0');hash.update(await readFile(join(root,rel)));hash.update('\0')}
-const criticalHash=hash.digest('hex')
+const criticalHash=await computeCriticalHash(root)
 if(evidence.releaseId!==release.releaseId)throw new Error(`RELEASE BLOCKED: rendered evidence belongs to ${evidence.releaseId||'unknown'}, not ${release.releaseId}.`)
 if(evidence.criticalHash!==criticalHash)throw new Error('RELEASE BLOCKED: critical UI/core/docs/server files changed after the rendered walkthrough evidence was produced.')
 if(evidence.verdict!=='PASS')throw new Error(`RELEASE BLOCKED: rendered walkthrough verdict is ${evidence.verdict||'missing'}.`)
