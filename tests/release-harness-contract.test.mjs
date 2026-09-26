@@ -108,9 +108,17 @@ test('critical-source manifest covers the complete staged source contract except
   assert.deepEqual([...listed].sort(),[...expected].sort())
 })
 
-test('Windows qualification writes BOM-free lifecycle evidence and isolates per-run map cache',()=>{
+test('Windows qualification is legacy-parser safe, writes BOM-free lifecycle evidence, and isolates per-run map cache',()=>{
   const ps=read('tests/windows-lifecycle-native.ps1')
   assert.match(ps,/UTF8Encoding\(\$false\)/)
   assert.match(ps,/\$env:APPDATA=\$appData/)
   assert.match(ps,/starting','working','ready/)
+  assert.equal([...ps].some(ch=>ch.codePointAt(0)>127),false,'native Windows lifecycle script must remain ASCII-safe for Windows PowerShell 5.1 re-entry')
+  assert.doesNotMatch(ps,/powershell\.exe/i,'native lifecycle must re-enter through the current PowerShell host, not force Windows PowerShell 5.1')
+  assert.match(ps,/\(Get-Process -Id \$PID\)\.Path/)
+  if(exists('.github/workflows/release.yml')){
+    const release=read('.github/workflows/release.yml')
+    assert.doesNotMatch(release,/^\s*powershell(?:\.exe)?\s+-NoProfile.*windows-lifecycle-native\.ps1/im,'release workflow must not nest legacy Windows PowerShell for the lifecycle entrypoint')
+    assert.match(release,/& \.\\tests\\windows-lifecycle-native\.ps1/)
+  }
 })

@@ -11,7 +11,8 @@ if(-not $Externalized){
   $self=(Resolve-Path -LiteralPath $MyInvocation.MyCommand.Path).Path
   $copy=Join-Path $env:TEMP ("wayfinder-windows-lifecycle-"+[guid]::NewGuid().ToString('N')+'.ps1')
   Copy-Item -LiteralPath $self -Destination $copy -Force
-  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $copy -ZipPath (Resolve-Path -LiteralPath $ZipPath).Path -EvidenceOut $EvidenceOut -Externalized
+  $hostExe=(Get-Process -Id $PID).Path
+  & $hostExe -NoProfile -ExecutionPolicy Bypass -File $copy -ZipPath (Resolve-Path -LiteralPath $ZipPath).Path -EvidenceOut $EvidenceOut -Externalized
   $code=$LASTEXITCODE
   Remove-Item -LiteralPath $copy -Force -ErrorAction SilentlyContinue
   exit $code
@@ -85,4 +86,4 @@ finally{
   if(Test-Path -LiteralPath $work){Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue}
 }
 if($verdict -ne 'PASS'){Write-Error "WAYFINDER native Windows lifecycle FAIL: $errorText";exit 1}
-Write-Host "WAYFINDER native Windows lifecycle PASS — evidence: $out";exit 0
+Write-Host "WAYFINDER native Windows lifecycle PASS - evidence: $out";exit 0
