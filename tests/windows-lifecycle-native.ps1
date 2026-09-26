@@ -22,7 +22,7 @@ function Get-FreePort {
   $listener=[System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback,0);$listener.Start();$p=([System.Net.IPEndPoint]$listener.LocalEndpoint).Port;$listener.Stop();return $p
 }
 function Wait-Http([string]$Url,[int]$Seconds=15){$end=(Get-Date).AddSeconds($Seconds);while((Get-Date)-lt $end){try{$r=Invoke-WebRequest -UseBasicParsing -Uri $Url -TimeoutSec 1;if($r.StatusCode -eq 200){return $true}}catch{};Start-Sleep -Milliseconds 150};return $false}
-function Wait-ProcessGone([int]$Pid,[int]$Seconds=10){$end=(Get-Date).AddSeconds($Seconds);while((Get-Date)-lt $end){if(-not (Get-Process -Id $Pid -ErrorAction SilentlyContinue)){return $true};Start-Sleep -Milliseconds 150};return -not [bool](Get-Process -Id $Pid -ErrorAction SilentlyContinue)}
+function Wait-ProcessGone([int]$ProcessId,[int]$Seconds=10){$end=(Get-Date).AddSeconds($Seconds);while((Get-Date)-lt $end){if(-not (Get-Process -Id $ProcessId -ErrorAction SilentlyContinue)){return $true};Start-Sleep -Milliseconds 150};return -not [bool](Get-Process -Id $ProcessId -ErrorAction SilentlyContinue)}
 function Test-PortFree([int]$Port){try{$l=[System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback,$Port);$l.Start();$l.Stop();return $true}catch{return $false}}
 function Post-Json([string]$Url,$Body,[hashtable]$Headers=@{}){return Invoke-RestMethod -Method Post -Uri $Url -Headers $Headers -ContentType 'application/json' -Body ($Body|ConvertTo-Json -Depth 12 -Compress) -TimeoutSec 20}
 
