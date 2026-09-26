@@ -1,8 +1,8 @@
 {
-  "releaseId": "WAYFINDER-2026-09-25-DEVELOPMENT-GATE",
+  "releaseId": "WAYFINDER-2026-09-25-CONSOLIDATED-GATE",
   "verdict": "PASS",
-  "criticalHash": "f898660a7f3d263583f883cb40006a2ec15c21059750b7d4a156adf6c0dc3873",
-  "createdAt": "2026-09-25T21:52:37Z",
+  "criticalHash": "adefc88607e3a190fa11ed389173bd31a0fbc8b35da6f34123197bc4538e3d88",
+  "createdAt": "2026-09-25T23:57:24Z",
   "engine": "Chromium rendered canonical-family four-variant matrix (isolated parallel family processes)",
   "requiredFamilies": [
     "vague-named-route",

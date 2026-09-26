@@ -7,13 +7,14 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-call npm run release:check
+call npm run package:verify
 if errorlevel 1 (
   echo.
-  echo Verification failed.
+  echo Package verification failed.
   pause
   exit /b 1
 )
 echo.
-echo Release Manager verification passed.
+echo Local package verification passed.
+echo Final release qualification is produced by the frozen GitHub Windows release workflow.
 pause

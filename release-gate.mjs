@@ -4,7 +4,8 @@ import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root=fileURLToPath(new URL('.',import.meta.url))
-const readJson=async rel=>JSON.parse(await readFile(join(root,rel),'utf8'))
+const parseJson=text=>JSON.parse(String(text).replace(/^\uFEFF/,''))
+const readJson=async rel=>parseJson(await readFile(join(root,rel),'utf8'))
 const sha256=data=>createHash('sha256').update(data).digest('hex')
 const release=await readJson('RELEASE.json')
 const acceptance=await readJson('ACCEPTANCE_JOURNEYS.json')
@@ -63,7 +64,7 @@ const exactZipHash=String(process.env.WAYFINDER_EXACT_ZIP_SHA256||'').trim().toL
 if(!windowsEvidencePath)throw new Error('RELEASE BLOCKED: native Windows lifecycle evidence is required for the exact frozen ZIP.')
 if(!exactZipHash||!/^[a-f0-9]{64}$/.test(exactZipHash))throw new Error('RELEASE BLOCKED: WAYFINDER_EXACT_ZIP_SHA256 must identify the exact frozen ZIP.')
 let windows
-try{windows=JSON.parse(await readFile(resolve(windowsEvidencePath),'utf8'))}catch(e){throw new Error(`RELEASE BLOCKED: native Windows lifecycle evidence could not be read: ${e.message}`)}
+try{windows=parseJson(await readFile(resolve(windowsEvidencePath),'utf8'))}catch(e){throw new Error(`RELEASE BLOCKED: native Windows lifecycle evidence could not be read: ${e.message}`)}
 if(windows.verdict!=='PASS'||windows.platform!=='win32')throw new Error('RELEASE BLOCKED: lifecycle evidence is not a native Windows PASS.')
 if(windows.releaseId!==release.releaseId)throw new Error('RELEASE BLOCKED: Windows lifecycle evidence belongs to a different release.')
 if(String(windows.exactZipSha256||'').toLowerCase()!==exactZipHash)throw new Error('RELEASE BLOCKED: Windows lifecycle evidence is not bound to the exact frozen ZIP hash.')

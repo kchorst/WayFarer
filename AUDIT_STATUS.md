@@ -1,7 +1,7 @@
 # WAYFINDER — Release Manager audit status
 
-**Release:** `WAYFINDER-2026-09-25-DEVELOPMENT-GATE`  
-**Status:** **UNVERIFIED / DEVELOPMENT ONLY.** All non-Windows gates must pass, then the exact frozen ZIP must produce native Windows lifecycle evidence before this status can become READY FOR USER ACCEPTANCE.
+**Release:** `WAYFINDER-2026-09-25-CONSOLIDATED-GATE`  
+**Status:** **UNVERIFIED / DEVELOPMENT ONLY.** Source gates and rendered QA must pass across their Linux/Windows CI matrices, then the exact frozen ZIP must produce native Windows lifecycle evidence before this status can become READY FOR USER ACCEPTANCE.
 
 ## Release-manager findings closed
 
@@ -18,7 +18,7 @@
 
 The Release Manager hostile audit owns a separate expected-outcome oracle instead of using product validation as its own proof. It exercises hundreds of deterministic generated/mutated semantic cases, unrelated boundary prompts, geography mismatch/unverified controls, route-length variation, and duration-range boundaries. Named trips remain regression examples only.
 
-The rendered Chromium suite exercises normal, contradictory, degraded, stale-work/backtracking, persistence, mapping, and documentation behavior against the actual shipped HTML/CSS/ES modules with deterministic local-service mocks. Required broad journeys are declared in `ACCEPTANCE_JOURNEYS.json`; a separate hash-bound canonical-family matrix requires normal, contradictory, degraded/offline, and navigation/backtracking variants for every family. `GUIDE_ACCEPTANCE.json` assigns all 13 numbered User Guide sections to executable rendered evidence and/or the native-Windows lifecycle gate.
+The rendered Chromium suite runs on both Linux and Windows before frozen qualification and exercises normal, contradictory, degraded, stale-work/backtracking, persistence, mapping, and documentation behavior against the actual shipped HTML/CSS/ES modules with deterministic local-service mocks. Required broad journeys are declared in `ACCEPTANCE_JOURNEYS.json`; a separate hash-bound canonical-family matrix requires normal, contradictory, degraded/offline, and navigation/backtracking variants for every family. `GUIDE_ACCEPTANCE.json` assigns all 13 numbered User Guide sections to executable rendered evidence and/or the native-Windows lifecycle gate.
 
 ## Release verdict rule
 

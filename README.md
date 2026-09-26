@@ -134,7 +134,7 @@ or:
 npm run check
 ```
 
-These checks cover the source/regression/runtime-smoke/integrity suite that is wired into `package.json`. Browser acceptance remains a separate end-to-end acceptance activity and should not be inferred solely from a passing unit/regression count.
+`VERIFY-WAYFINDER.cmd` is a local integrity/regression check for an already packaged copy. `npm run check` is the source-development gate and does not pretend that a source checkout has a frozen package manifest. Browser acceptance remains a separate end-to-end acceptance activity and should not be inferred solely from a passing unit/regression count.
 
 ## Development rule
 
@@ -142,4 +142,4 @@ Do not repair WAYFINDER with route-specific hotfixes. A discovered failure is ev
 
 ## Release Manager verification
 
-`VERIFY-WAYFINDER.cmd` runs regression/source/runtime/integrity checks and the Release Manager gate. The gate requires rendered traveler evidence for every required journey in `ACCEPTANCE_JOURNEYS.json`, and those journey markers must also exist in `USER_GUIDE.md`. Evidence is rejected if the shipped UI/core/docs changed afterward.
+`VERIFY-WAYFINDER.cmd` runs the packaged regression, syntax, runtime-smoke, hostile, and complete-tree integrity checks. It does **not** recreate release qualification. Final qualification is produced only by the frozen GitHub Windows release workflow, which binds rendered evidence, native-Windows lifecycle evidence, the exact candidate ZIP SHA-256, and the package-integrity manifest before publishing the traveler artifact.

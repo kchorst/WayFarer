@@ -331,7 +331,7 @@ WAYFINDER validates saved/imported canonical state. If a stored state fails cano
 
 ## 13. Verify the package
 
-`VERIFY-WAYFINDER.cmd` runs the regression, syntax, runtime-smoke, integrity, and Release Manager gates. `GUIDE_ACCEPTANCE.json` assigns every numbered guide section to concrete rendered evidence and, where Windows behavior is involved, the native-Windows lifecycle certificate; a section with no executable evidence owner blocks release. The Release Manager gate treats this guide as part of the executable product contract: every required journey below has a stable marker in this guide, a matching rendered Chromium scenario, and must PASS against the same critical UI/core/docs bytes that are packaged.
+`VERIFY-WAYFINDER.cmd` verifies the already packaged copy locally: regression tests, syntax, runtime smoke, hostile audit, and complete-tree integrity. It does not manufacture a release certificate. `GUIDE_ACCEPTANCE.json` assigns every numbered guide section to concrete rendered evidence and, where Windows behavior is involved, the native-Windows lifecycle certificate; a section with no executable evidence owner blocks release. Final qualification is produced only by the frozen GitHub Windows release workflow after the exact ZIP, rendered evidence, and native-Windows lifecycle evidence all agree on the same release and hashes.
 
 These are the required release journeys for this build:
 

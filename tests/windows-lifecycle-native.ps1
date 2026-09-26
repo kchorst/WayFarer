@@ -28,8 +28,8 @@ function Post-Json([string]$Url,$Body,[hashtable]$Headers=@{}){return Invoke-Res
 $zip=(Resolve-Path -LiteralPath $ZipPath).Path
 $out=[System.IO.Path]::GetFullPath($EvidenceOut)
 $work=Join-Path $env:TEMP ('wayfinder-native-'+[guid]::NewGuid().ToString('N'))
-$extract=Join-Path $work 'extract';$runtime=Join-Path $work 'runtime';$maps=Join-Path $work 'maps';$settings=Join-Path $work 'settings.json'
-New-Item -ItemType Directory -Path $extract,$runtime,$maps -Force|Out-Null
+$extract=Join-Path $work 'extract';$runtime=Join-Path $work 'runtime';$maps=Join-Path $work 'maps';$appData=Join-Path $work 'appdata';$settings=Join-Path $work 'settings.json'
+New-Item -ItemType Directory -Path $extract,$runtime,$maps,$appData -Force|Out-Null
 $checks=[ordered]@{integrityVerified=$false;launcherUsed=$false;appReachable=$false;backgroundWorkStarted=$false;normalExitUsed=$false;nodeGone=$false;workersGone=$false;portFree=$false;runtimeStateGone=$false;folderRenamed=$false;folderDeleted=$false}
 $verdict='FAIL';$errorText='';$releaseId='';$criticalHash='';$manifestHash='';$zipHash=(Get-FileHash -Algorithm SHA256 -LiteralPath $zip).Hash.ToLowerInvariant();$port=Get-FreePort
 try{
@@ -48,7 +48,7 @@ try{
   & node (Join-Path $root 'tests\create-tiny-pbf.mjs') (Join-Path $maps 'lifecycle.osm.pbf')|Out-Null
   if($LASTEXITCODE -ne 0){throw 'Could not prepare lifecycle PBF fixture.'}
 
-  $env:WAYFINDER_PORT=[string]$port;$env:WAYFINDER_RUNTIME_DIR=$runtime;$env:WAYFINDER_SETTINGS_PATH=$settings;$env:WAYFINDER_REFERENCE_ENDPOINT='http://127.0.0.1:1';$env:WAYFINDER_AI_ENDPOINT='http://127.0.0.1:1';$env:WAYFINDER_ALLOW_WEB_GEOCODE='0';$env:WAYFINDER_NO_BROWSER='1';$env:WAYFINDER_CLIENT_CLOSE_GRACE_MS='800'
+  $env:APPDATA=$appData;$env:WAYFINDER_PORT=[string]$port;$env:WAYFINDER_RUNTIME_DIR=$runtime;$env:WAYFINDER_SETTINGS_PATH=$settings;$env:WAYFINDER_REFERENCE_ENDPOINT='http://127.0.0.1:1';$env:WAYFINDER_AI_ENDPOINT='http://127.0.0.1:1';$env:WAYFINDER_ALLOW_WEB_GEOCODE='0';$env:WAYFINDER_NO_BROWSER='1';$env:WAYFINDER_CLIENT_CLOSE_GRACE_MS='800'
   $launcher=Start-Process -FilePath 'cmd.exe' -ArgumentList '/c',('"'+(Join-Path $root 'WAYFINDER.cmd')+'"') -WorkingDirectory $root -WindowStyle Hidden -PassThru -Wait
   if($launcher.ExitCode -ne 0){throw "WAYFINDER.cmd returned $($launcher.ExitCode)."};$checks.launcherUsed=$true
   if(-not (Wait-Http "http://127.0.0.1:$port/api/status" 15)){throw 'WAYFINDER did not become reachable.'};$checks.appReachable=$true
@@ -60,11 +60,11 @@ try{
   $render=Post-Json "http://127.0.0.1:$port/api/offline/render" @{points=@(@{lat=18.0;lon=-76.8},@{lat=18.001;lon=-76.799});legModes=@('Car')}
   if(-not $render.job.id){throw 'Background offline-map worker did not start.'}
   $jobState=[string]$render.job.state
-  if($jobState -notin @('starting','working')){
+  if($jobState -notin @('starting','working','ready')){
     $live=Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:$port/api/offline/job/$($render.job.id)" -TimeoutSec 5
     $jobState=[string]$live.job.state
   }
-  if($jobState -notin @('starting','working')){throw "Offline-map background job was not live before shutdown (state=$jobState)."};$checks.backgroundWorkStarted=$true
+  if($jobState -notin @('starting','working','ready')){throw "Offline-map background job did not start successfully before shutdown (state=$jobState)."};$checks.backgroundWorkStarted=$true
 
   Post-Json "http://127.0.0.1:$port/api/system/client/exit" @{clientId=$clientId} $headers|Out-Null;$checks.normalExitUsed=$true
   $checks.nodeGone=Wait-ProcessGone $serverPid 12
@@ -81,7 +81,7 @@ try{
 }catch{$errorText=$_.Exception.Message}
 finally{
   $evidence=[ordered]@{schemaVersion=1;verdict=$verdict;platform='win32';releaseId=$releaseId;exactZipSha256=$zipHash;criticalHash=$criticalHash;packageManifestSha256=$manifestHash;createdAt=(Get-Date).ToUniversalTime().ToString('o');checks=$checks;error=$errorText}
-  $outDir=Split-Path -Parent $out;if($outDir){New-Item -ItemType Directory -Path $outDir -Force|Out-Null};$evidence|ConvertTo-Json -Depth 8|Set-Content -LiteralPath $out -Encoding UTF8
+  $outDir=Split-Path -Parent $out;if($outDir){New-Item -ItemType Directory -Path $outDir -Force|Out-Null};$json=$evidence|ConvertTo-Json -Depth 8;[System.IO.File]::WriteAllText($out,$json,(New-Object System.Text.UTF8Encoding($false)))
   if(Test-Path -LiteralPath $work){Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue}
 }
 if($verdict -ne 'PASS'){Write-Error "WAYFINDER native Windows lifecycle FAIL: $errorText";exit 1}

@@ -1,14 +1,15 @@
 {
-  "releaseId": "WAYFINDER-2026-09-25-DEVELOPMENT-GATE",
+  "releaseId": "WAYFINDER-2026-09-25-CONSOLIDATED-GATE",
   "verdict": "PASS",
-  "criticalHash": "f898660a7f3d263583f883cb40006a2ec15c21059750b7d4a156adf6c0dc3873",
-  "createdAt": "2026-09-25T21:53:14Z",
+  "criticalHash": "adefc88607e3a190fa11ed389173bd31a0fbc8b35da6f34123197bc4538e3d88",
+  "createdAt": "2026-09-25T23:57:02Z",
   "engine": "Chromium rendered DOM via Playwright with deterministic mocked local services",
   "scenarios": [
     {
       "id": "immediate-trip-basics",
       "status": "PASS",
-      "tripBasicsVisibleMs": 97
+      "tripBasicsVisibleMs": 99,
+      "desktopBasicsSideBySide": true
     },
     {
       "id": "single-app-lifecycle-ui",
@@ -20,7 +21,8 @@
       "id": "home-local-service-health",
       "status": "PASS",
       "offlineVisible": true,
-      "recheckRecovered": true
+      "recheckRecovered": true,
+      "headerNotClippedAtDesktopWidths": true
     },
     {
       "id": "fresh-spark-prompt-clean",
@@ -31,7 +33,7 @@
       "id": "background-feedback",
       "status": "PASS",
       "firstVisibleConcepts": 1,
-      "firstIdeaAfterConfirmMs": 43
+      "firstIdeaAfterConfirmMs": 42
     },
     {
       "id": "corsica-geographic-scope",
@@ -41,7 +43,7 @@
     {
       "id": "sardinia-corsica-multi-area",
       "status": "PASS",
-      "firstIdeaAfterConfirmMs": 40
+      "firstIdeaAfterConfirmMs": 47
     },
     {
       "id": "shikoku",
@@ -115,7 +117,7 @@
     {
       "id": "serial-local-model-jamaica",
       "status": "PASS",
-      "firstUsefulValidatedSkeletonMs": 305,
+      "firstUsefulValidatedSkeletonMs": 310,
       "maxConcurrentLocalModelJobs": 1,
       "jamaicaRegression": true
     },
@@ -123,7 +125,7 @@
       "id": "slow-model-first-useful-skeleton",
       "status": "PASS",
       "simulatedFirstStreamDelayMs": 12500,
-      "firstUsefulValidatedSkeletonMs": 8530,
+      "firstUsefulValidatedSkeletonMs": 8531,
       "invalidSlowSkeletonRejected": true
     },
     {

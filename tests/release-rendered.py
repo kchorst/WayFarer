@@ -3,6 +3,13 @@ from pathlib import Path
 import re,posixpath,json,hashlib,time,sys,traceback,os
 
 ROOT=Path(__file__).resolve().parents[1]
+
+def launch_chromium(pw):
+    override=os.environ.get('WAYFINDER_CHROMIUM_EXECUTABLE','').strip()
+    options={'headless':True}
+    if os.name!='nt': options['args']=['--no-sandbox']
+    if override: options['executable_path']=override
+    return pw.chromium.launch(**options)
 PUB=ROOT/'public'
 RELEASE=json.loads((ROOT/'RELEASE.json').read_text(encoding='utf-8'))
 ACCEPTANCE=json.loads((ROOT/'ACCEPTANCE_JOURNEYS.json').read_text(encoding='utf-8'))
@@ -167,7 +174,7 @@ MOCK_FETCH=r'''()=>{
   };
   window.fetch=async(input,init={})=>{
     const u=String(input),url=new URL(u,'https://mock.invalid'),path=url.pathname;
-    if(path==='/api/status'){const refsOnline=window.__referencesOnline!==false;window.__mockSettings=window.__mockSettings||{aiEndpoint:'',aiModel:'',referenceEndpoint:'http://127.0.0.1:8091',gazetteerEndpoint:'',pbfRoot:'',mapQuestConfigured:false,mapQuestKeyHint:'',allowWebGeocode:true};const pbfOn=Boolean(window.__mockSettings.pbfRoot);return jsonResponse({ok:true,release:{releaseId:'WAYFINDER-RM-2026-09-24-E'},ai:{available:true,reachable:true,model:window.__mockSettings.aiModel||'mock-wayfinder'},references:{available:refsOnline,wikivoyage:refsOnline,wikipedia:refsOnline,message:refsOnline?'':'mock Kiwix offline'},geocoding:{local:true,localReferences:refsOnline,mapquest:window.__mockSettings.mapQuestConfigured,webFallback:window.__mockSettings.allowWebGeocode!==false},mapquest:{configured:window.__mockSettings.mapQuestConfigured},offlinePbf:pbfOn?{available:true,kind:'raw-osm-pbf-library',catalogCount:1,message:'1 installed .osm.pbf file found'}:{available:false,kind:'raw-osm-pbf-library',message:'Not configured'},settings:{allowWebGeocode:window.__mockSettings.allowWebGeocode!==false},performance:{interactiveLimitMs:120000}});}
+    if(path==='/api/status'){const refsOnline=window.__referencesOnline!==false;window.__mockSettings=window.__mockSettings||{aiEndpoint:'',aiModel:'',referenceEndpoint:'http://127.0.0.1:8091',gazetteerEndpoint:'',pbfRoot:'',mapQuestConfigured:false,mapQuestKeyHint:'',allowWebGeocode:true};const pbfOn=Boolean(window.__mockSettings.pbfRoot);return jsonResponse({ok:true,release:{releaseId:'WAYFINDER-RM-2026-09-24-E',version:'WAYFINDER-VERSION'},ai:{available:true,reachable:true,model:window.__mockSettings.aiModel||'mock-wayfinder'},references:{available:refsOnline,wikivoyage:refsOnline,wikipedia:refsOnline,message:refsOnline?'':'mock Kiwix offline'},geocoding:{local:true,localReferences:refsOnline,mapquest:window.__mockSettings.mapQuestConfigured,webFallback:window.__mockSettings.allowWebGeocode!==false},mapquest:{configured:window.__mockSettings.mapQuestConfigured},offlinePbf:pbfOn?{available:true,kind:'raw-osm-pbf-library',catalogCount:1,message:'1 installed .osm.pbf file found'}:{available:false,kind:'raw-osm-pbf-library',message:'Not configured'},settings:{allowWebGeocode:window.__mockSettings.allowWebGeocode!==false},performance:{interactiveLimitMs:120000}});}
     window.__lifecycleCalls=window.__lifecycleCalls||[];
     if(path==='/api/system/client/register'){window.__lifecycleCalls.push('register');return jsonResponse({ok:true,clientId:'mock-client',closeGraceMs:2500});}
     if(path==='/api/system/client/heartbeat'){window.__lifecycleCalls.push('heartbeat');return jsonResponse({ok:true});}
@@ -202,7 +209,7 @@ MOCK_FETCH=r'''()=>{
     throw new Error('Unexpected mocked fetch '+u)
   };
 }'''
-MOCK_FETCH=MOCK_FETCH.replace('WAYFINDER-RM-2026-09-24-E',RELEASE['releaseId'])
+MOCK_FETCH=MOCK_FETCH.replace('WAYFINDER-RM-2026-09-24-E',RELEASE['releaseId']).replace('WAYFINDER-VERSION',RELEASE['version'])
 
 def make_page(browser,seed_storage=None):
     page=browser.new_page(viewport={'width':1440,'height':1000})
@@ -226,6 +233,21 @@ def text(page,sel):return page.locator(sel).inner_text()
 def prompt(page,value):page.locator('#brief').fill(value);page.locator('#sparkBtn').click()
 def wait_props(page,n=1):page.wait_for_function(f"document.querySelectorAll('#proposals .proposal').length>={n}",timeout=10000)
 
+def assert_shell_geometry(page,width,height):
+    page.set_viewport_size({'width':width,'height':height});page.wait_for_timeout(30)
+    metrics=page.evaluate("""()=>{
+      const bar=document.querySelector('.topbar'),brand=document.querySelector('.brand-row'),actions=document.querySelector('.top-actions');
+      const r=e=>{const x=e.getBoundingClientRect();return{top:x.top,bottom:x.bottom,left:x.left,right:x.right,width:x.width,height:x.height}};
+      const children=[...actions.children].filter(e=>getComputedStyle(e).display!=='none').map(r);
+      return{bar:r(bar),brand:r(brand),actions:r(actions),children,scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth};
+    }""")
+    assert metrics['bar']['top']>=-1
+    assert metrics['brand']['top']>=metrics['bar']['top']-1 and metrics['brand']['bottom']<=metrics['bar']['bottom']+1
+    assert metrics['actions']['top']>=metrics['bar']['top']-1 and metrics['actions']['bottom']<=metrics['bar']['bottom']+1
+    assert all(c['top']>=metrics['bar']['top']-1 and c['bottom']<=metrics['bar']['bottom']+1 for c in metrics['children'])
+    assert metrics['scrollWidth']<=metrics['viewport']+1,(width,metrics)
+    return metrics['bar']['height']
+
 def scenario_immediate(page):
     t=time.perf_counter();prompt(page,'Give me a tour of Corsica.')
     page.wait_for_function("!document.querySelector('#tripBasicsPanel').hidden",timeout=500)
@@ -237,7 +259,11 @@ def scenario_immediate(page):
     assert 'Destination(s):' in text(page,'#tripBasicsSignals') and 'Start:' in text(page,'#tripBasicsSignals')
     assert 'background' in text(page,'#sparkStatus').lower()
     assert page.locator('#proposals .proposal').count()==0
-    return {'tripBasicsVisibleMs':ms}
+    # Desktop review must use the available horizontal space: request on the left,
+    # confirmation panel on the right, with neither surface clipped.
+    rects=page.evaluate("""()=>{const a=document.querySelector('#brief').getBoundingClientRect(),b=document.querySelector('#tripBasicsPanel').getBoundingClientRect();return{brief:{left:a.left,right:a.right,top:a.top,bottom:a.bottom},panel:{left:b.left,right:b.right,top:b.top,bottom:b.bottom},vw:innerWidth}}""")
+    assert rects['panel']['left']>rects['brief']['right'] and rects['panel']['right']<=rects['vw']+1,rects
+    return {'tripBasicsVisibleMs':ms,'desktopBasicsSideBySide':True}
 
 def scenario_single_app_lifecycle(page):
     assert page.locator('#exitBtn').is_visible()
@@ -255,6 +281,10 @@ def scenario_single_app_lifecycle(page):
     return {'exitControlVisible':True,'pagehideCloseWired':True}
 
 def scenario_home_service_health(page):
+    header_heights=[assert_shell_geometry(page,1366,768),assert_shell_geometry(page,1024,768)]
+    assert all(h>=66 for h in header_heights)
+    assert text(page,'#buildBadge')==f"v{RELEASE['version']}"
+    assert RELEASE['releaseId'] not in text(page,'#buildBadge')
     assert page.locator('#referenceBadge').is_visible()
     assert page.locator('#checkServicesBtn').is_visible()
     page.evaluate("window.__referencesOnline=false")
@@ -264,7 +294,7 @@ def scenario_home_service_health(page):
     page.evaluate("window.__referencesOnline=true")
     page.locator('#checkServicesBtn').click()
     page.wait_for_function("document.querySelector('#referenceBadge')?.textContent.includes('Kiwix running')",timeout=3000)
-    return {'offlineVisible':True,'recheckRecovered':True}
+    return {'offlineVisible':True,'recheckRecovered':True,'headerNotClippedAtDesktopWidths':True}
 
 def scenario_fresh_spark_prompt_clean(page):
     browser=page.context.browser
@@ -578,7 +608,7 @@ if not os.environ.get('WAYFINDER_RENDERED_SCENARIO') and scenario_ids!=required_
 def run_release_rendered(write=True):
     results=[];verdict='PASS'
     with sync_playwright() as pw:
-        browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+        browser=launch_chromium(pw)
         selected=os.environ.get('WAYFINDER_RENDERED_SCENARIO','').strip()
         scenarios=[x for x in SCENARIOS if not selected or x[0]==selected]
         if selected and not scenarios: raise RuntimeError(f'Unknown rendered scenario: {selected}')
@@ -592,7 +622,7 @@ def run_release_rendered(write=True):
                 if page:page.close()
         browser.close()
     evidence={'releaseId':RELEASE['releaseId'],'verdict':verdict,'criticalHash':critical_hash(),'createdAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'engine':'Chromium rendered DOM via Playwright with deterministic mocked local services','scenarios':results}
-    if write:(ROOT/'RENDERED_ACCEPTANCE.json').write_text(json.dumps(evidence,indent=2)+'\n')
+    if write:(ROOT/'RENDERED_ACCEPTANCE.json').write_text(json.dumps(evidence,indent=2)+'\n',encoding='utf-8')
     return evidence
 
 if __name__=='__main__':

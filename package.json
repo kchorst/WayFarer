@@ -1,21 +1,22 @@
 {
   "name": "wayfinder-rebuild",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
     "test": "node scripts/run-tests.mjs",
-    "check": "npm test && npm run syntax && npm run smoke && npm run integrity",
+    "check": "npm test && npm run syntax && npm run smoke && npm run audit:hostile",
     "smoke": "node tests/runtime-smoke.mjs",
     "syntax": "node verify-source.mjs",
     "integrity": "node verify-integrity.mjs",
     "release:gate": "node release-gate.mjs",
-    "release:check": "npm run check && npm run audit:hostile && npm run release:gate",
+    "release:check": "npm run package:verify && npm run release:gate",
     "audit:hostile": "node tests/release-hostile-audit.mjs",
-    "rendered:matrix": "python tests/release-rendered-matrix-all.py"
+    "rendered:matrix": "python tests/release-rendered-matrix-all.py",
+    "package:verify": "npm test && npm run syntax && npm run smoke && npm run audit:hostile && npm run integrity"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=20"
   }
 }

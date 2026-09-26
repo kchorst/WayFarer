@@ -55,6 +55,6 @@ evidence={
     'requiredFamilies':FAMILIES,'requiredVariants':VARIANTS,'families':results
 }
 if '--no-write' not in sys.argv:
-    (ROOT/'RENDERED_VARIANT_EVIDENCE.json').write_text(json.dumps(evidence,indent=2)+'\n')
+    (ROOT/'RENDERED_VARIANT_EVIDENCE.json').write_text(json.dumps(evidence,indent=2)+'\n',encoding='utf-8')
 print(json.dumps(evidence,indent=2))
 if verdict!='PASS': sys.exit(1)

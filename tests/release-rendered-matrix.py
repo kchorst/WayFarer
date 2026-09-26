@@ -3,6 +3,13 @@ from pathlib import Path
 import importlib.util,json,time,traceback,sys,os
 
 ROOT=Path(__file__).resolve().parents[1]
+
+def launch_chromium(pw):
+    override=os.environ.get('WAYFINDER_CHROMIUM_EXECUTABLE','').strip()
+    options={'headless':True}
+    if os.name!='nt': options['args']=['--no-sandbox']
+    if override: options['executable_path']=override
+    return pw.chromium.launch(**options)
 spec=importlib.util.spec_from_file_location('rr',ROOT/'tests'/'release-rendered.py')
 rr=importlib.util.module_from_spec(spec);spec.loader.exec_module(rr)
 RELEASE=json.loads((ROOT/'RELEASE.json').read_text(encoding='utf-8'))
@@ -144,7 +151,12 @@ def document_contradictory(p):
         if checks.nth(i).is_checked(): checks.nth(i).uncheck()
     last=checks.nth(checks.count()-1);assert last.is_checked();last.click();p.wait_for_timeout(80);assert last.is_checked();assert 'at least one' in rr.text(p,'#documentStatus').lower()
 def document_degraded(p):
-    adopt_sicily(p,'document');p.evaluate("window.__docFail=true");p.locator('#documentBtn').click();p.wait_for_function("document.querySelector('#documentOutput').textContent.length>50",timeout=4000);status=rr.text(p,'#documentStatus').lower();assert 'degraded' in status and 'fallback' in status
+    adopt_sicily(p,'document');p.evaluate("window.__docFail=true");p.locator('#documentBtn').click()
+    # The deterministic document baseline is intentionally visible before model enrichment finishes.
+    # Completion is therefore owned by the action lifecycle, not by output length.
+    p.wait_for_function("!document.querySelector('#documentBtn').disabled",timeout=5000)
+    assert len(rr.text(p,'#documentOutput'))>50
+    status=rr.text(p,'#documentStatus').lower();assert p.locator('#documentStatus').evaluate("el=>el.classList.contains('warn')") and 'degraded' in status and 'fallback' in status
 def document_navigation(p):
     adopt_sicily(p,'refine');p.locator('[data-tab="precision"]').click();p.locator('#routeEditor .stop-label').nth(1).fill('Changed');p.locator('[data-tab="document"]').click();p.locator('#documentBtn').click();p.wait_for_timeout(100);assert 'saved trip' in rr.text(p,'#documentStatus').lower() or 'unsaved' in rr.text(p,'#documentStatus').lower()
 
@@ -190,7 +202,7 @@ FAMILIES={
 def run_matrix(write=True):
     families={};verdict='PASS'
     with sync_playwright() as pw:
-        browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+        browser=launch_chromium(pw)
         selected={k:v for k,v in FAMILIES.items() if not os.environ.get('WAYFINDER_MATRIX_FAMILY') or k==os.environ.get('WAYFINDER_MATRIX_FAMILY')}
         for family,cases in selected.items():
             families[family]={}
@@ -200,7 +212,7 @@ def run_matrix(write=True):
                 if result['status']!='PASS':verdict='FAIL'
         browser.close()
     evidence={'releaseId':RELEASE['releaseId'],'verdict':verdict,'criticalHash':rr.critical_hash(),'createdAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'engine':'Chromium rendered DOM four-variant canonical-family matrix','requiredVariants':list(VARIANTS),'families':families}
-    if write:(ROOT/'RENDERED_VARIANT_EVIDENCE.json').write_text(json.dumps(evidence,indent=2)+'\n')
+    if write:(ROOT/'RENDERED_VARIANT_EVIDENCE.json').write_text(json.dumps(evidence,indent=2)+'\n',encoding='utf-8')
     return evidence
 
 if __name__=='__main__':
